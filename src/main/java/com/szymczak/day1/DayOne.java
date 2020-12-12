@@ -32,6 +32,7 @@ public class DayOne {
         List<Integer> numbersInInt = tryParseToNumber(numbers);
         return findTwoNumbers(numbersInInt, numbersInInt.size(), EXPECTED_SUM);
     }
+
     private static long getResultPartTwo(String[] numbers) throws Exception {
         List<Integer> numbersInInt = tryParseToNumber(numbers);
         return findThreeNumbers(tryParseToNumber(numbers), numbersInInt.size());
@@ -54,7 +55,7 @@ public class DayOne {
         if (length < 3) throw new Exception("Something went wrong!");
 
         Integer number = numbersInInt.get(0);
-        Integer toExpectedScore = EXPECTED_SUM - number;
+        int toExpectedScore = EXPECTED_SUM - number;
 
         List<Integer> filteredValues = numbersInInt.stream()
                 .filter($ -> toExpectedScore > $).collect(Collectors.toList());
