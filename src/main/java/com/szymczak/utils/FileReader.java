@@ -1,4 +1,4 @@
-package com.szymczak.util;
+package com.szymczak.utils;
 
 import java.io.File;
 import java.io.IOException;

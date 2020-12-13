@@ -1,6 +1,6 @@
 package com.szymczak.day2;
 
-import com.szymczak.util.FileReader;
+import com.szymczak.utils.FileReader;
 
 import java.io.File;
 
