@@ -19,7 +19,6 @@ public class DayFive {
 
     private static int getMineSeat(String[] lines, int rows, int cols) {
         List<Integer> seats = getSeats(lines, rows, cols);
-        System.out.println(seats);
         int checkingSeat = seats.get(0);
         for (int i = 0; i < seats.size();) {
             int currSeat = seats.get(i);
