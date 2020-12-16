@@ -75,7 +75,7 @@ public class Day8 {
         if (index == instructions.size()) {
             return new ProgramResult(accelerator, true);
         }
-        
+
         Instruction instruction = instructions.get(index);
         if (instruction.isUsed()) {
             return new ProgramResult(accelerator, false);
