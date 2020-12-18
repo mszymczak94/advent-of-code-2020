@@ -118,8 +118,7 @@ public class DayEleven {
 
         private boolean occupiedSeatValidation(int i, int j, char[][] map) {
             return Arrays.stream(Direction.values())
-                    .filter($ -> $.isValid(i, j, map) && $.getPosition(i, j, map) == '#')
-                    .noneMatch($ -> areOccupiedSeatInPersonEyes($, i, j, map))
+                    .filter($ -> areOccupiedSeatInPersonEyes($, i, j, map))
 //                    .count() >= 4; Part One
                     .count() >= 5;
         }
