@@ -13,22 +13,127 @@ public class DayTwenty {
         validateExample();
         String[] read = FileReader.read(new File("src/main/java/com/szymczak/day20/day19"));
         List<Image> images = prepareData(read);
-        System.out.println(findSquareArrangement(images));
+        Image[][] foundImage = searchSquare((int) Math.sqrt(images.size()), images);
+        long squareArrangement = getSum(foundImage);
+        System.out.println(squareArrangement);
+        UtilsDay20.getStringFromImage(foundImage);
+        System.out.println(hashesWithoutMonsters(UtilsDay20.getStringFromImage(foundImage)));
 
     }
 
     private static void validateExample() throws Exception {
         String[] read = FileReader.read(new File("src/main/java/com/szymczak/day20/example"));
         List<Image> images = prepareData(read);
-        long squareArrangement = findSquareArrangement(images);
+        Image[][] foundImage = searchSquare((int) Math.sqrt(images.size()), images);
+        long squareArrangement = getSum(foundImage);
         if (squareArrangement != 20899048083289L) throw new Exception("Invalid implementation " + squareArrangement);
+        long result = hashesWithoutMonsters(UtilsDay20.getStringFromImage(foundImage));
+
+        if (result != 273) throw new Exception("Invalid implementation " + squareArrangement);
     }
 
-    private static long findSquareArrangement(List<Image> images) {
-        int size = images.size();
-        size = (int) Math.sqrt(size);
-        Image[][] imagesArr = searchSquare(size, images);
-        return imagesArr[0][0].tile * imagesArr[0][size-1].tile*imagesArr[size-1][0].tile*imagesArr[size-1][size-1].tile;
+    private static long hashesWithoutMonsters(String stringFromImage) {
+        char[][] chars = Arrays.stream(stringFromImage.split("\n"))
+                .map(String::toCharArray).toArray(char[][]::new);
+
+        ImageWithMonster imageWithMonster = new ImageWithMonster(chars);
+        imageWithMonster.currentUsed = imageWithMonster.image;
+        char[][] result = getImageWithMonsters(imageWithMonster.currentUsed);
+        if (result != null) {
+            return getResult(result);
+        }
+        imageWithMonster.currentUsed = UtilsDay20.swapSides(UtilsDay20.copy(imageWithMonster.currentUsed));
+        result = getImageWithMonsters(imageWithMonster.currentUsed);
+        if (result != null) {
+            return getResult(result);
+        }
+
+        imageWithMonster.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(imageWithMonster.currentUsed));
+        result = getImageWithMonsters(imageWithMonster.currentUsed);
+        if (result != null) {
+            return getResult(result);
+        }
+        imageWithMonster.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(imageWithMonster.currentUsed));
+        result = getImageWithMonsters(imageWithMonster.currentUsed);
+        if (result != null) {
+            return getResult(result);
+        }
+        imageWithMonster.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(imageWithMonster.currentUsed));
+        result = getImageWithMonsters(imageWithMonster.currentUsed);
+        if (result != null) {
+            return getResult(result);
+        }
+        imageWithMonster.currentUsed = UtilsDay20.upsideDown(imageWithMonster.image);
+        result = getImageWithMonsters(imageWithMonster.currentUsed);
+        if (result != null) {
+            return getResult(result);
+        }
+        imageWithMonster.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(imageWithMonster.currentUsed));
+        result = getImageWithMonsters(imageWithMonster.currentUsed);
+        if (result != null) {
+            return getResult(result);
+        }
+        imageWithMonster.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(imageWithMonster.currentUsed));
+        result = getImageWithMonsters(imageWithMonster.currentUsed);
+        if (result != null) {
+            return getResult(result);
+        }
+        imageWithMonster.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(imageWithMonster.currentUsed));
+        result = getImageWithMonsters(imageWithMonster.currentUsed);
+        if (result != null) {
+            return getResult(result);
+        }
+        throw new RuntimeException("Implementation not working!");
+    }
+
+    private static char[][] getImageWithMonsters(char[][] currentUsed) {
+        boolean isAnyMonster = false;
+        //                  #
+        //#    ##    ##    ###
+        // #  #  #  #  #  #
+        for (int i = 0; i < currentUsed.length; i++) { // due to monster size
+            for (int j = 0; j < currentUsed.length; j++) { // due to monster size
+                char c = currentUsed[i][j];
+                if (c == '.' || c == 'O') {
+                    continue;
+                }
+                if (monsterAdd(i, j, currentUsed) && !isAnyMonster) {
+                    isAnyMonster = true;
+                }
+            }
+        }
+        return isAnyMonster ? currentUsed : null;
+    }
+
+    private static boolean monsterAdd(int i, int j, char[][] currentUsed) {
+        for (Point point : ImageWithMonster.INDEXES_TO_CHECK) {
+            int tempX = point.y + i;
+            int tempY = point.x + j;
+            if (tempX >= currentUsed.length || tempY >= currentUsed.length || currentUsed[tempX][tempY] != '#') {
+                return false;
+            }
+        }
+        Arrays.stream(ImageWithMonster.INDEXES_TO_CHECK)
+                .forEach($ -> currentUsed[$.y + i][$.x + j] = 'O');
+        return true;
+    }
+
+    private static long getResult(char[][] result) {
+        UtilsDay20.print(result);
+        long counter = 0;
+        for (char[] chars : result) {
+            for (char aChar : chars) {
+                if (aChar == '#') {
+                    counter++;
+                }
+            }
+        }
+        return counter;
+    }
+
+    private static long getSum(Image[][] imagesArr) {
+        int size = imagesArr.length;
+        return imagesArr[0][0].tile * imagesArr[0][size - 1].tile * imagesArr[size - 1][0].tile * imagesArr[size - 1][size - 1].tile;
     }
 
     private static Image[][] searchSquare(int size, List<Image> images) {
@@ -45,7 +150,7 @@ public class DayTwenty {
                 return arr;
             }
 
-            image.currentUsed = image.rotate90(image.image);
+            image.currentUsed = UtilsDay20.rotate90(image.image);
             arr = new Image[size][size];
             arr[0][0] = image;
             isFound = isValid(arr, tempImages);
@@ -53,7 +158,7 @@ public class DayTwenty {
                 return arr;
             }
 
-            image.currentUsed = image.rotate90(image.image);
+            image.currentUsed = UtilsDay20.rotate90(image.image);
             arr = new Image[size][size];
             arr[0][0] = image;
             isFound = isValid(arr, tempImages);
@@ -61,7 +166,7 @@ public class DayTwenty {
                 return arr;
             }
 
-            image.currentUsed = image.rotate90(image.image);
+            image.currentUsed = UtilsDay20.rotate90(image.image);
             arr = new Image[size][size];
             arr[0][0] = image;
             isFound = isValid(arr, tempImages);
@@ -69,7 +174,7 @@ public class DayTwenty {
                 return arr;
             }
 
-            image.currentUsed = image.swapSides(image.image);
+            image.currentUsed = UtilsDay20.swapSides(image.image);
             arr = new Image[size][size];
             arr[0][0] = image;
             isFound = isValid(arr, tempImages);
@@ -77,7 +182,7 @@ public class DayTwenty {
                 return arr;
             }
 
-            image.currentUsed = image.rotate90(Image.copy(image.currentUsed));
+            image.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(image.currentUsed));
             arr = new Image[size][size];
             arr[0][0] = image;
             isFound = isValid(arr, tempImages);
@@ -85,7 +190,7 @@ public class DayTwenty {
                 return arr;
             }
 
-            image.currentUsed = image.rotate90(Image.copy(image.currentUsed));
+            image.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(image.currentUsed));
             arr = new Image[size][size];
             arr[0][0] = image;
             isFound = isValid(arr, tempImages);
@@ -93,7 +198,7 @@ public class DayTwenty {
                 return arr;
             }
 
-            image.currentUsed = image.rotate90(Image.copy(image.currentUsed));
+            image.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(image.currentUsed));
             arr = new Image[size][size];
             arr[0][0] = image;
             isFound = isValid(arr, tempImages);
@@ -101,7 +206,7 @@ public class DayTwenty {
                 return arr;
             }
 
-            image.currentUsed = image.upsideDown(image.image);
+            image.currentUsed = UtilsDay20.upsideDown(image.image);
             arr = new Image[size][size];
             arr[0][0] = image;
             isFound = isValid(arr, tempImages);
@@ -109,7 +214,7 @@ public class DayTwenty {
                 return arr;
             }
 
-            image.currentUsed = image.rotate90(Image.copy(image.currentUsed));
+            image.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(image.currentUsed));
             arr = new Image[size][size];
             arr[0][0] = image;
             isFound = isValid(arr, tempImages);
@@ -117,7 +222,7 @@ public class DayTwenty {
                 return arr;
             }
 
-            image.currentUsed = image.rotate90(Image.copy(image.currentUsed));
+            image.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(image.currentUsed));
             arr = new Image[size][size];
             arr[0][0] = image;
             isFound = isValid(arr, tempImages);
@@ -125,7 +230,7 @@ public class DayTwenty {
                 return arr;
             }
 
-            image.currentUsed = image.rotate90(Image.copy(image.currentUsed));
+            image.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(image.currentUsed));
             arr = new Image[size][size];
             arr[0][0] = image;
             isFound = isValid(arr, tempImages);
@@ -165,52 +270,53 @@ public class DayTwenty {
     private static boolean isArrValid(Image[][] imageArr, int i, int j, Image tempImage) {
         tempImage.currentUsed = tempImage.image;
         if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
-                return true;
+            return true;
         }
 
-        tempImage.currentUsed = tempImage.rotate90(Image.copy(tempImage.currentUsed));
+        tempImage.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(tempImage.currentUsed));
         if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
-                return true;
+            return true;
         }
-        tempImage.currentUsed = tempImage.rotate90(Image.copy(tempImage.currentUsed));
+        tempImage.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(tempImage.currentUsed));
         if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
-                return true;
+            return true;
         }
-        tempImage.currentUsed = tempImage.rotate90(Image.copy(tempImage.currentUsed));
+        tempImage.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(tempImage.currentUsed));
         if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
-                return true;
+            return true;
         }
 
-        tempImage.currentUsed = tempImage.upsideDown(tempImage.image);
+        tempImage.currentUsed = UtilsDay20.upsideDown(tempImage.image);
         if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
-                return true;
+            return true;
         }
-        tempImage.currentUsed = tempImage.rotate90(Image.copy(tempImage.currentUsed));
+        tempImage.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(tempImage.currentUsed));
         if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
-                return true;
+            return true;
         }
-        tempImage.currentUsed = tempImage.rotate90(Image.copy(tempImage.currentUsed));
+        tempImage.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(tempImage.currentUsed));
         if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
-                return true;
+            return true;
         }
-        tempImage.currentUsed = tempImage.rotate90(Image.copy(tempImage.currentUsed));
+        tempImage.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(tempImage.currentUsed));
         if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
-                return true;
+            return true;
         }
-        tempImage.currentUsed = tempImage.swapSides(tempImage.image);
+        tempImage.currentUsed = UtilsDay20.swapSides(tempImage.image);
         if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
-                return true;
-        }tempImage.currentUsed = tempImage.rotate90(Image.copy(tempImage.currentUsed));
-        if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
-                return true;
+            return true;
         }
-        tempImage.currentUsed = tempImage.rotate90(Image.copy(tempImage.currentUsed));
+        tempImage.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(tempImage.currentUsed));
         if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
-                return true;
+            return true;
         }
-        tempImage.currentUsed = tempImage.rotate90(Image.copy(tempImage.currentUsed));
+        tempImage.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(tempImage.currentUsed));
         if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
-                return true;
+            return true;
+        }
+        tempImage.currentUsed = UtilsDay20.rotate90(UtilsDay20.copy(tempImage.currentUsed));
+        if (leftOk(imageArr, i, j) && rightOk(imageArr, i, j) && topOk(imageArr, i, j) && bottomOk(imageArr, i, j)) {
+            return true;
         }
         tempImage.currentUsed = null;
 
@@ -309,42 +415,6 @@ public class DayTwenty {
             return builder.toString();
         }
 
-        private char[][] swapSides(char[][] image) {
-            char[][] clone = copy(image);
-            StringBuilder builder = new StringBuilder();
-            for (int i = 0; i < image.length; i++) {
-                char[] reversed = builder.append(clone[i]).reverse().toString().toCharArray();
-                builder = new StringBuilder();
-                clone[i] = reversed;
-            }
-            return clone;
-        }
-
-        private char[][] upsideDown(char[][] image) {
-            char[][] clone = copy(image);
-            for (int i = image.length; 0 < i; i--) {
-                clone[image.length - i] = image[i - 1];
-            }
-            return clone;
-        }
-
-        private char[][] rotate90(char[][] image) {
-            char[][] clone = copy(image);
-            for (int i = 0; i < image.length; i++) {
-                for (int j = 0; j < image.length; j++) {
-                    clone[i][j] = image[image.length - 1 - j][i];
-                }
-            }
-            return clone;
-        }
-
-        private static char[][] copy(char[][] image) {
-            char[][] copy = new char[image.length][];
-            for (int i = 0; i < image.length; i++) {
-                copy[i] = Arrays.copyOf(image[i], image[i].length);
-            }
-            return copy;
-        }
 
         public boolean suitToLeft(Image leftImage) {
             int length = this.currentUsed.length - 1;
@@ -385,6 +455,120 @@ public class DayTwenty {
                 }
             }
             return true;
+        }
+    }
+
+    private static class Point {
+        private final int x;
+        private final int y;
+
+        private Point(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    private static class ImageWithMonster {
+        private final char[][] image;
+        private char[][] currentUsed = null;
+        private final static Point[] INDEXES_TO_CHECK = {
+                new Point(0, 0),
+                new Point(1, 1),
+                new Point(4, 1),
+                new Point(5, 0),
+                new Point(6, 0),
+                new Point(7, 1),
+                new Point(10, 1),
+                new Point(11, 0),
+                new Point(12, 0),
+                new Point(13, 1),
+                new Point(16, 1),
+                new Point(17, 0),
+                new Point(18, 0),
+                new Point(18, -1),
+                new Point(19, 0),
+        };
+
+        private ImageWithMonster(char[][] image) {
+            this.image = image;
+        }
+
+    }
+
+    private static class UtilsDay20 {
+
+        private static char[][] swapSides(char[][] image) {
+            char[][] clone = copy(image);
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < image.length; i++) {
+                char[] reversed = builder.append(clone[i]).reverse().toString().toCharArray();
+                builder = new StringBuilder();
+                clone[i] = reversed;
+            }
+            return clone;
+        }
+
+        private static char[][] upsideDown(char[][] image) {
+            char[][] clone = copy(image);
+            for (int i = image.length; 0 < i; i--) {
+                clone[image.length - i] = image[i - 1];
+            }
+            return clone;
+        }
+
+        private static char[][] rotate90(char[][] image) {
+            char[][] clone = copy(image);
+            for (int i = 0; i < image.length; i++) {
+                for (int j = 0; j < image.length; j++) {
+                    clone[i][j] = image[image.length - 1 - j][i];
+                }
+            }
+            return clone;
+        }
+
+        private static char[][] copy(char[][] image) {
+            char[][] copy = new char[image.length][];
+            for (int i = 0; i < image.length; i++) {
+                copy[i] = Arrays.copyOf(image[i], image[i].length);
+            }
+            return copy;
+        }
+
+        public static String getStringFromImage(Image[][] foundImage) {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < foundImage.length; i++) {
+                int currIndex = 1;
+                for (int j = 0; j < foundImage.length; ) {
+                    Image image = foundImage[j][i];
+                    for (int k = 1; k < image.currentUsed.length - 1; k++) {
+                        builder.append(image.currentUsed[k][currIndex]);
+                    }
+                    j++;
+                    if (j == foundImage.length) {
+                        j = 0;
+                        currIndex++;
+                        builder.append('\n');
+                    }
+
+                    if (currIndex == image.currentUsed.length - 1) {
+                        break;
+                    }
+
+                }
+            }
+            return builder.toString();
+        }
+
+
+        public static void print(char[][] arr) {
+            StringBuilder builder = new StringBuilder();
+            for (char[] chars : arr) {
+                for (char aChar : chars) {
+                    builder.append(aChar);
+                }
+                builder.append('\n');
+            }
+            System.out.println(builder.toString());
         }
     }
 }
