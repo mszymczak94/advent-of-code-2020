@@ -5,9 +5,9 @@ pipeline {
 			steps {
 				sh 'mvn clean package'
 			}
-			post {
+			postBuildPublishers {
 				echo "Now Archiving the Artifacts...."
-				archiveArtifacts artifacts: '**/*.war'
+				archiveArtifacts pattern: '**/*.war'
 			}
 		}
 	}
