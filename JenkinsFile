@@ -1,25 +1,13 @@
 pipeline {
 	agent any
 	stages {
-		stage('Init') {
+		stage('Build Application') {
 			steps {
-				echo "Hey this is Michal from EY"
-				echo "We are starting the testing"
+				sh 'mvn clean package'
 			}
-		}
-		stage('Build') {
-			steps {
-				echo "Building Sample Maven project"
-			}
-		}
-		stage('Deploy') {
-			steps {
-				echo "Deploying in Stagin Area"
-			}
-		}
-		stage('Deploy Production') {
-			steps {
-				echo "Deploying in Production Area"
+			post {
+				echo "Now Archiving the Artifacts...."
+				archiveArtifacts artifacts: '**/*.war'
 			}
 		}
 	}
