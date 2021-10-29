@@ -7,7 +7,7 @@ pipeline {
 				
 				postBuildPublishers {
 					echo "Now Archiving the Artifacts...."
-					archiveArtifacts pattern: '**/*.war'
+					archiveArtifacts artifacts: '**/*.war'
 				}
 			}
 		}
